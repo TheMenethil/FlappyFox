@@ -4,12 +4,12 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var bird = {
     x: 50,
-    y: 200,
+    y: 100,
     w: 30,
     h: 35,
     speed: 0,
-    gravity: 0.5,
-    jump: 9
+    gravity: 0.48,
+    jump: 8
 };
 var pipes = [];
 var score = 0;
@@ -46,7 +46,11 @@ function drawBird() {
 function drawPipes() {
     for (var i = 0; i < pipes.length; i++) {
         ctx.fillStyle = "#005888";
-        ctx.fillRect(pipes[i].x, 0, pipes[i].w, pipes[i].y);
+        ctx.fillRect(
+            pipes[i].x,
+            0,
+            pipes[i].w,
+            pipes[i].y);
         ctx.fillRect(
             pipes[i].x,
             pipes[i].y + pipes[i].h,
@@ -57,7 +61,8 @@ function drawPipes() {
 function drawScore() {
     ctx.fillStyle = "#000";
     ctx.font = "30px 'Varela Round', sans-serif";
-    ctx.fillText("Score: " + score, scoreX, 50);
+    ctx.textAlign = "center";
+    ctx.fillText("Score: " + score, canvas.width/2, 50);
 }
 
 // Fonctions de mise à jour
@@ -93,7 +98,7 @@ function addPipe() {
         x: canvas.width,
         y: Math.floor(Math.random() * canvas.height - 200) + 100,
         w: 50,
-        h: Math.floor(Math.random() * (300 - 200 + 1)) + 150
+        h: Math.floor(Math.random() * (300 - 150 + 1)) + 150
     };
     pipes.push(pipe);
 }
@@ -121,7 +126,7 @@ var game = setInterval(function() {
 function resetGame() {
     bird = {
         x: 50,
-        y: 200,
+        y: 100,
         w: 30,
         h: 35,
         speed: 0,
@@ -140,14 +145,23 @@ function resetGame() {
     isGameOver = false;
 }
 
-// Événement de saut pour l'oiseau
-document.addEventListener("keydown", function(e) {
+// Événement de saut pour l'oiseau avec espace
+document.addEventListener("keydown", function (e) {
     if (e.code === "Space") {
         if (isGameOver) {
             resetGame();
         } else {
             bird.speed = -bird.jump;
         }
+    }
+});
+
+// Événement de saut pour l'oiseau au clic
+canvas.addEventListener("click", function (e) {
+    if (isGameOver) {
+        resetGame();
+    } else {
+        bird.speed = -bird.jump;
     }
 });
 

@@ -1,4 +1,5 @@
 // Variables de jeu
+var bestScoreSpan = document.getElementById("bestScoreSpan");
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var bird = {
@@ -13,8 +14,29 @@ var bird = {
 var pipes = [];
 var score = 0;
 var scoreX = canvas.width - (65 * canvas.width) / 100;
+var isGameOver = false;
+var bestScore = localStorage.getItem("bestScore");
 const img = new Image();
 img.src = 'https://mathis-backert.com/img/logo/logo-mathis-backert.svg';
+
+// Écrire le best score
+function writeScore(scoreToWrite) {
+    bestScoreSpan.innerHTML = scoreToWrite;
+}
+
+// Calculer le best score
+function calcScore() {
+    bestScore = localStorage.getItem("bestScore");
+    if (bestScore !== null) {
+        if (score > bestScore) {
+            localStorage.setItem('bestScore', score);
+        }
+    } else {
+        localStorage.setItem('bestScore', 0);
+    }
+    bestScore = localStorage.getItem("bestScore");
+    writeScore(bestScore);
+}
 
 // Fonctions de dessin
 function drawBird() {
@@ -25,7 +47,11 @@ function drawPipes() {
     for (var i = 0; i < pipes.length; i++) {
         ctx.fillStyle = "#005888";
         ctx.fillRect(pipes[i].x, 0, pipes[i].w, pipes[i].y);
-        ctx.fillRect(pipes[i].x, pipes[i].y + pipes[i].h, pipes[i].w, canvas.height - pipes[i].y - pipes[i].h);
+        ctx.fillRect(
+            pipes[i].x,
+            pipes[i].y + pipes[i].h,
+            pipes[i].w,
+            canvas.height - pipes[i].y - pipes[i].h);
     }
 }
 function drawScore() {
@@ -40,6 +66,8 @@ function updateBird() {
     bird.y += bird.speed;
     if (bird.y < 0 || bird.y > canvas.height - bird.h || checkCollision()) {
         clearInterval(game);
+        isGameOver = true;
+        calcScore();
     }
 }
 function updatePipes() {
@@ -89,18 +117,17 @@ var game = setInterval(function() {
     updateGame();
 }, 1000/60);
 
-// Événement de saut pour l'oiseau
-document.addEventListener("keydown", function(e) {
-    if (e.keyCode == 32) {
-        bird.speed = -bird.jump;
-    }
-});
-
 // Réinitialiser le jeu
 function resetGame() {
-    bird.x = 50;
-    bird.y = 200;
-    bird.speed = 0;
+    bird = {
+        x: 50,
+        y: 200,
+        w: 30,
+        h: 35,
+        speed: 0,
+        gravity: 0.5,
+        jump: 9
+    };
     pipes = [];
     score = 0;
     game = setInterval(function() {
@@ -110,5 +137,18 @@ function resetGame() {
         drawScore();
         updateGame();
     }, 1000/60);
+    isGameOver = false;
 }
-  
+
+// Événement de saut pour l'oiseau
+document.addEventListener("keydown", function(e) {
+    if (e.code === "Space") {
+        if (isGameOver) {
+            resetGame();
+        } else {
+            bird.speed = -bird.jump;
+        }
+    }
+});
+
+calcScore();
